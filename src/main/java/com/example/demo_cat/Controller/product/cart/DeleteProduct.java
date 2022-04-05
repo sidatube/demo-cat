@@ -18,7 +18,7 @@ public class DeleteProduct extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         UltraModel<Product> model = new UltraModel<>(Product.class);
-        Product obj = model.findById(Integer.parseInt(req.getParameter("id")));
+        Product obj = model.findById(Integer.parseInt(req.getParameter("id"))|0);
         if (obj == null) {
             resp.setStatus(404);
             resp.getWriter().println("Not found");

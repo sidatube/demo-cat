@@ -3,11 +3,14 @@ package com.example.demo_cat.ulti.Config;
 public class ConfigSql {
     ///
     public static final String INSERT = "INSERT INTO";
+    public static final String ALTER_TABLE = "ALTER TABLE";
     public static final String STAR = "*";
     public static final String QUESTION = "?";
     public static final String COUNT = "COUNT";
     public static final String AS = "AS";
     public static final String DROP_TABLE = "DROP TABLE";
+    public static final String DROP = "DROP";
+    public static final String CONSTRAINT = "CONSTRAINT";
     public static final String CREATE_TABLE = "CREATE TABLE";
     public static final String PRIMARY_KEY = "PRIMARY KEY";
     public static final String FOREIGN_KEY = "FOREIGN KEY";

@@ -278,8 +278,8 @@ public class UltraModel<T> {
         return false;
     }
     private void loadResultSetIntoObject(ResultSet rst,Object obj) throws SQLException, IllegalAccessException {
-        Class<?> clazz = obj.getClass();
-        for(Field field: clazz.getDeclaredFields()){
+//        Class<?> clazz = obj.getClass();
+        for(Field field: type.getDeclaredFields()){
             field.setAccessible(true);
             if (field.isAnnotationPresent(Column.class)){
                 Column column = field.getDeclaredAnnotation(Column.class);

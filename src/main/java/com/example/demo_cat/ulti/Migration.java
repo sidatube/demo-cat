@@ -15,8 +15,8 @@ import java.util.Set;
 
 public class Migration {
     private static Connection connection;
-
-    {
+    public static final String scanFolder="com.example.demo_cat";
+    static {
         try {
             connection = ConnectionHelper.createConnection();
         } catch (SQLException | ClassNotFoundException e) {
@@ -24,13 +24,15 @@ public class Migration {
         }
     }
 
+
     public static void main(String[] args) {
-        Reflections reflections = new Reflections("com.example.demo_cat");
-        Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Table.class);
+        Set<Class<?>> annotated = getAnnotation();
         for (Class<?> table : annotated
         ) {
             createTable(table);
-//            dropTable(table);
+//            dropForeignKey(table);
+//                        dropTable(table);
+
         }
 
 
@@ -79,7 +81,37 @@ public class Migration {
         return false;
 
     }
-    public static void dropTable(Class clazz){
+
+    public static void dropForeignKey(Class clazz) {
+        if (!clazz.isAnnotationPresent(Table.class)) {
+            return;
+        }
+        String tableName = clazz.getSimpleName().toLowerCase() + "s";
+
+        Table table = (Table) clazz.getDeclaredAnnotation(Table.class);
+        if (table.name().length() > 0) {
+            tableName = table.name();
+        }
+        Field[] listField = clazz.getDeclaredFields();
+        for (Field field : listField) {
+            if (!field.isAnnotationPresent(ForeignKey.class)) {
+                continue;
+            }
+            ForeignKey foreignKey = field.getDeclaredAnnotation(ForeignKey.class);
+            String dropColumnKey = ConfigSql.ALTER_TABLE + ConfigSql.SPACE + tableName + ConfigSql.SPACE + ConfigSql.DROP + ConfigSql.SPACE + ConfigSql.FOREIGN_KEY + ConfigSql.SPACE + getConstraintName(foreignKey, tableName);
+            System.out.println(dropColumnKey);
+            try {
+                PreparedStatement stt = connection.prepareStatement(dropColumnKey);
+                stt.execute();
+                return;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public static void dropTable(Class clazz) {
         if (!clazz.isAnnotationPresent(Table.class)) {
             return;
         }
@@ -96,8 +128,8 @@ public class Migration {
         }
         try {
             Statement DropStt = connection.createStatement();
-            DropStt.execute(String.format(ConfigSql.DROP_TABLE+" %s",tableName));
-            System.out.printf("Delete table %s success\n",tableName);
+            DropStt.execute(String.format(ConfigSql.DROP_TABLE + " %s", tableName));
+            System.out.printf("Delete table %s success\n", tableName);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -153,18 +185,23 @@ public class Migration {
                     ForeignKey foreignKey = field.getAnnotation(ForeignKey.class);
                     // check có bảng hay chưa
                     if (isExistsTable(foreignKey.referenceTable())) {
-                        Reflections reflections = new Reflections("com.example.demo_cat");
-                        Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Table.class);
+                        Set<Class<?>> annotated = getAnnotation();
                         for (Class<?> preTable : annotated
                         ) {
-                            Table preTableName= preTable.getDeclaredAnnotation(Table.class);
-                            if (preTableName.name().equals(foreignKey.referenceTable())){
+                            Table preTableName = preTable.getDeclaredAnnotation(Table.class);
+                            if (preTableName.name().equals(foreignKey.referenceTable())) {
                                 createTable(preTable);
                             }
                         }
                     }
+                    String constraintName = getConstraintName(foreignKey, tableName);
+
                     //end
                     sqlString.append(ConfigSql.COMMA);
+                    sqlString.append(ConfigSql.CONSTRAINT);
+                    sqlString.append(ConfigSql.SPACE);
+                    sqlString.append(constraintName);
+                    sqlString.append(ConfigSql.SPACE);
                     sqlString.append(ConfigSql.FOREIGN_KEY);
                     sqlString.append(ConfigSql.SPACE);
                     sqlString.append(ConfigSql.OPEN_BRACKET);
@@ -184,14 +221,27 @@ public class Migration {
         }
         sqlString.setLength(sqlString.length() - 1);
         sqlString.append(ConfigSql.CLOSE_BRACKET);
-        System.out.println(sqlString.toString());
-
+        System.out.println(sqlString);
         try {
             PreparedStatement statement = connection.prepareStatement(sqlString.toString());
             statement.execute();
-            System.out.printf(ConfigSql.CREATE_TABLE+" %s success%n", tableName);
+            System.out.printf(ConfigSql.CREATE_TABLE + " %s success%n", tableName);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
+
+    private static String getConstraintName(ForeignKey foreignKey, String tableName) {
+        if (foreignKey.constraint().length() > 0) {
+            return foreignKey.constraint();
+        } else {
+            return "fk_" + tableName + '_' + foreignKey.referenceTable();
+        }
+    }
+
+    private static Set<Class<?>> getAnnotation() {
+        Reflections reflections = new Reflections(scanFolder);
+        return reflections.getTypesAnnotatedWith(Table.class);
+    }
+
 }
