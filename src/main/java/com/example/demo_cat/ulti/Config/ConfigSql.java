@@ -39,4 +39,6 @@ public class ConfigSql {
     public static final String TABLE_SCHEMA = "table_schema";
     public static final String TABLE_NAME = "table_name";
 
+    public static final String SELECT_ACCOUNT_BY_USERNAME = "select * from accounts where username=?" ;
+    public static final String LOCK_ACCOUNT = "update accounts set status=?,failureCount = ?,lockTime=? where username = ?" ;
 }

@@ -3,6 +3,7 @@ package com.example.demo_cat.entity;
 import com.example.demo_cat.annotation.Column;
 import com.example.demo_cat.annotation.Id;
 import com.example.demo_cat.annotation.Table;
+import com.example.demo_cat.ulti.ValidateUtil;
 
 import java.util.HashMap;
 
@@ -31,6 +32,9 @@ public class Student {
         }
         if (this.email==null||this.email.length()==0){
             this.errors.put("email","Email is required");
+        }
+        if (ValidateUtil.checkEmail(this.email)){
+            this.errors.put("email","Email is error");
         }
     }
     public HashMap<String ,String >getErrors(){

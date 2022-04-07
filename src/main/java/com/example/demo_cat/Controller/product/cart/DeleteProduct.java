@@ -15,17 +15,25 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class DeleteProduct extends HttpServlet {
+
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         UltraModel<Product> model = new UltraModel<>(Product.class);
-        Product obj = model.findById(Integer.parseInt(req.getParameter("id"))|0);
+        int id =0;
+        try {
+            id = Integer.parseInt(req.getParameter("id"));
+
+        }catch (Exception e){
+            resp.getWriter().println("Invalid Id");
+        }
+        Product  obj = model.findById(id);
         if (obj == null) {
             resp.setStatus(404);
             resp.getWriter().println("Not found");
         } else {
             Cart cart = CartSlaveFactory.getCart(req);
             cart.removeItem(obj);
-            resp.sendRedirect("/products/cart");
-        }
-    }
+            CartSlaveFactory.setCart(req,cart);
+            resp.setStatus(200);
+        }    }
 }

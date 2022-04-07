@@ -89,11 +89,6 @@ public class Cart {
         CartItem item =null;
         if (mapItem.containsKey(obj.getId())){
             item = mapItem.get(obj.getId());
-        }else{
-            item = new CartItem();
-            item.setProductId(obj.getId());
-            item.setProductName(obj.getName());
-            item.setThumbnail(obj.getThumbnail());
         }
         item.setQty(qty);
         mapItem.put(obj.getId(), item);

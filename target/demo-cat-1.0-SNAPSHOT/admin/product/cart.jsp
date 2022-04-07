@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.example.demo_cat.entity.CartItem" %>
-<%@ page import="java.util.ArrayList" %>
 <%@ page import="com.example.demo_cat.entity.Cart" %>
 <%
 
@@ -8,6 +7,7 @@
     if (cart==null){
         cart = new Cart();
     }
+    double grandTotal=0;
 %>
 <!DOCTYPE html>
 <html>
@@ -21,6 +21,7 @@
 
     <a href="/products" class="w3-btn w3-blue">Back</a>
     <table class="w3-table-all w3-card-4">
+        <thead>
         <tr>
             <th>Id</th>
             <th>Name</th>
@@ -30,8 +31,11 @@
             <th>Total</th>
             <th>Action</th>
         </tr>
+        </thead>
+        <tbody>
         <% for (CartItem obj : cart.getListItem()
         ) {
+            grandTotal += obj.getTotal();
         %>
         <tr>
             <td><%=obj.getProductId()%>
@@ -41,9 +45,9 @@
             <td><img src="<%=obj.getThumbnail()%>" style="width:200px" alt=""></td>
             <td><%=obj.getUtilPRice()%> VND
             </td>
-            <td><%=obj.getQty()%>
+            <td><input type="number" class="update-input"   value="<%=obj.getQty()%>">
             </td>
-            <td><%=obj.getTotal()%>
+            <td><%=obj.getTotal()%> VND
             </td>
             <td><a href="/products/removeCart?id=<%=obj.getProductId()%>" class="w3-btn w3-blue btn-delete">
                 Delete
@@ -52,6 +56,12 @@
         <%
             }
         %>
+        </tbody>
+        <tfood>
+            <tr>
+                <td>Tổng:<%=grandTotal%> VND </td>
+            </tr>
+        </tfood>
     </table>
 
 
@@ -71,16 +81,19 @@
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4 && xhr.status == 200) {
                             alert("Deleted!")
-                            window.location.href = '/products/cart'
+                            window.location.reload()
                         }
                     }
-                    xhr.open('POST', this.href, false);
+                    xhr.open('DELETE', this.href, false);
                     xhr.send();
 
                 }
             })
         }
+
+
     })
+
 </script>
 </html>
 
